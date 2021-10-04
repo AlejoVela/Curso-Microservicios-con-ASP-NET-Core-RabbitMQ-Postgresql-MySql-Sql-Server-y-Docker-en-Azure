@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TiendaServicios.Api.Autor.Aplicación;
+using TiendaServicios.Api.Autor.Modelo;
 
 namespace TiendaServicios.Api.Autor.Controllers
 {
@@ -23,6 +24,16 @@ namespace TiendaServicios.Api.Autor.Controllers
         public async Task<ActionResult<Unit>> Crear(Nuevo.Ejecuta data)
         {
             return await this._mediator.Send(data);
+        }
+        [HttpGet]
+        public async Task<ActionResult<List<AutorLibro>>> GetAutores()
+        {
+            return await _mediator.Send(new Consulta.ListaAutor());
+        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<AutorLibro>> GetAutorLibro(string id)
+        {
+            return await _mediator.Send( new ConsultaFiltro.AutorUnico{ AutorGuid = id } );
         }
     }
 }
