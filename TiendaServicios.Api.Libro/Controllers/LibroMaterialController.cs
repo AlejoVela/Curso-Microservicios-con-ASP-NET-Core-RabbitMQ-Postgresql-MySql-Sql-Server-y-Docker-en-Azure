@@ -19,7 +19,6 @@ namespace TiendaServicios.Api.Libro.Controllers
         {
             this._mediator = mediator;
         }
-
         [HttpPost]
         public async Task<ActionResult<Unit>> Crear(Nuevo.Ejecuta data)
         {
