@@ -34,6 +34,9 @@ namespace TiendaServicios.Api.CarritoCompra
                 options.UseMySQL(Configuration.GetConnectionString("ConnectionDB"));
             });
             services.AddMediatR(typeof(Nuevo.Manejador).Assembly);
+            services.AddHttpClient("Libros", options => {
+                options.BaseAddress = new Uri(Configuration["Services:Libros"]);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
