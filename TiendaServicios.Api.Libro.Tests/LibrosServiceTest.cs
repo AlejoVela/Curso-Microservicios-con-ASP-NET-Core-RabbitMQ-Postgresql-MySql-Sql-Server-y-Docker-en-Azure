@@ -15,6 +15,8 @@ namespace TiendaServicios.Api.Libro.Tests
 {
     public class LibrosServiceTest
     {
+        public object ConsultaFiltro { get; private set; }
+
         private IEnumerable<LibreriaMaterial> ObtenerDataPrueba()
         {
             A.Configure<LibreriaMaterial>()
@@ -45,10 +47,34 @@ namespace TiendaServicios.Api.Libro.Tests
             dbSet.As<IAsyncEnumerable<LibreriaMaterial>>().Setup(x => x.GetAsyncEnumerator(new System.Threading.CancellationToken()))
                     .Returns(new AsyncEnumerator<LibreriaMaterial>(dataPrueba.GetEnumerator()));
 
+            dbSet.As<IQueryable<LibreriaMaterial>>().Setup(x => x.Provider).Returns(new AsyncQueryProvider<LibreriaMaterial>(dataPrueba.Provider));
+
             var contexto = new Mock<ContextoLibreria>();
             contexto.Setup(x => x.LibreriaMaterial).Returns(dbSet.Object);
             return contexto;
         }
+
+        [Fact]
+        public async void GetLibroById()
+        {
+            var mockContexto = CrearContexto();
+            var mapConfig = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new MappingTest());
+            });
+            var mapper = mapConfig.CreateMapper();
+
+            var request = new ConsultaLibroId.LibroUnico();
+            request.LibroId = Guid.Empty;
+
+
+            var manejador = new ConsultaLibroId.Manejador(mockContexto.Object, mapper);
+            var libro = await manejador.Handle(request, new System.Threading.CancellationToken());
+
+            Assert.NotNull(libro);
+            Assert.True(libro.LibreriaMaterialId == Guid.Empty);
+        }
+
 
         [Fact]
         public async void GetLibros()
@@ -77,6 +103,27 @@ namespace TiendaServicios.Api.Libro.Tests
             var lista = await manejador.Handle(request, new System.Threading.CancellationToken());
 
             Assert.True(lista.Any());
+        }
+        [Fact]
+        public async void GuardarLibro()
+        {
+            //creamos la base de datos en memoria
+            var options = new DbContextOptionsBuilder<ContextoLibreria>()
+                .UseInMemoryDatabase(databaseName: "BaseDatosLibro")
+                .Options;
+
+            var contexto = new ContextoLibreria(options);
+            var request = new  Nuevo.Ejecuta();
+            request.Titulo = "Libro de Microservicio";
+            request.AutorLibro = Guid.Empty;
+            request.FechaPublicacion = DateTime.Now;
+
+            var manejador = new Nuevo.Manejador(contexto);
+
+            var libro = await manejador.Handle(request, new System.Threading.CancellationToken());
+
+            Assert.True(libro != null);
+
         }
     }
 }
