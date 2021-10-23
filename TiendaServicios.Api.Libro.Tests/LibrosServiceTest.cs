@@ -74,8 +74,6 @@ namespace TiendaServicios.Api.Libro.Tests
             Assert.NotNull(libro);
             Assert.True(libro.LibreriaMaterialId == Guid.Empty);
         }
-
-
         [Fact]
         public async void GetLibros()
         {
